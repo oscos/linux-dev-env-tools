@@ -59,10 +59,3 @@ echo "   ✔ pre-commit"
 echo
 echo "Next steps:"
 echo "  • Restart your terminal OR run: source ~/.profile"
-echo "  • Create a new project with Poetry:"
-echo "        mkdir myproject && cd myproject"
-echo "        poetry init"
-echo "        poetry add pandas polars jupyter"
-echo "        poetry shell"
-echo
-echo "You're now ready for professional Python development!"
