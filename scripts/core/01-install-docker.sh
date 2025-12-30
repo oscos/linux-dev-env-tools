@@ -3,7 +3,16 @@ set -e
 
 echo "=== Installing Official Docker Engine (Docker CE) ==="
 
-# Ensure required packages are installed
+# ----------------------------
+# Variables
+# ----------------------------
+DOCKER_GPG_KEY="/etc/apt/keyrings/docker.gpg"
+DOCKER_KEYRING_DIR="/etc/apt/keyrings"
+DOCKER_REPO_FILE="/etc/apt/sources.list.d/docker.list"
+
+# ----------------------------
+# Prerequisites
+# ----------------------------
 echo "--- Installing prerequisite packages..."
 sudo apt-get update -y
 sudo apt-get install -y \
@@ -12,32 +21,42 @@ sudo apt-get install -y \
     gnupg \
     lsb-release
 
-# Create directory for Docker apt key
-sudo install -m 0755 -d /etc/apt/keyrings
+# ----------------------------
+# GPG Key
+# ----------------------------
+echo "--- Ensuring Docker GPG key exists..."
+sudo install -m 0755 -d "$DOCKER_KEYRING_DIR"
 
-# Add Docker’s official GPG key
-if [ ! -f /etc/apt/keyrings/docker.gpg ]; then
+if [ ! -f "$DOCKER_GPG_KEY" ]; then
     echo "--- Adding Docker GPG key..."
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-        sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    sudo chmod a+r /etc/apt/keyrings/docker.gpg
+        sudo gpg --dearmor -o "$DOCKER_GPG_KEY"
+    sudo chmod a+r "$DOCKER_GPG_KEY"
 else
     echo "--- Docker GPG key already exists, skipping."
 fi
 
-# Add Docker repository
-echo "--- Adding Docker APT repository..."
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+# ----------------------------
+# Docker APT Repository
+# ----------------------------
+if [ ! -f "$DOCKER_REPO_FILE" ]; then
+    echo "--- Adding Docker APT repository..."
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=$DOCKER_GPG_KEY] \
+      https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) stable" | \
+      sudo tee "$DOCKER_REPO_FILE" > /dev/null
+else
+    echo "--- Docker APT repository already exists, skipping."
+fi
 
-# Update package index
+# ----------------------------
+# Install Docker
+# ----------------------------
+echo "--- Updating package index..."
 sudo apt-get update -y
 
-# Install Docker Engine
-echo "--- Installing Docker CE + CLI + containerd..."
+echo "--- Installing Docker Engine + CLI + containerd..."
 sudo apt-get install -y \
     docker-ce \
     docker-ce-cli \
@@ -45,23 +64,32 @@ sudo apt-get install -y \
     docker-buildx-plugin \
     docker-compose-plugin
 
-# Ensure Docker daemon is enabled and started
+# ----------------------------
+# Enable Docker
+# ----------------------------
 echo "--- Enabling and starting Docker service..."
 sudo systemctl enable docker
 sudo systemctl start docker
 
-# Add current user to docker group
+# ----------------------------
+# Docker Group
+# ----------------------------
 echo "--- Adding user '$USER' to docker group..."
 sudo usermod -aG docker "$USER"
 
+# ----------------------------
+# Validation
+# ----------------------------
+echo ""
 echo "=== Docker installation complete! ==="
 echo ""
 
-# Test Docker if daemon is active
-echo "--- Running Docker hello-world test (may require log out/in)..."
-if docker run --rm hello-world; then
-    echo "=== Docker is working correctly! ==="
+if groups "$USER" | grep -q docker; then
+    echo "--- Running Docker hello-world test..."
+    docker run --rm hello-world && \
+        echo "=== Docker is working correctly! ==="
 else
-    echo "=== Docker installed, but hello-world failed."
-    echo "You may need to log out and back in for group membership to apply."
+    echo "=== Docker installed successfully ==="
+    echo "Log out and back in, then run:"
+    echo "    docker run hello-world"
 fi
