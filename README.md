@@ -14,7 +14,7 @@ These scripts are designed to be:
 * ✅ Minimal and dependency-aware
 * ✅ Suitable for personal laptops, lab machines, and cloud VMs
 
-This repository is intentionally structured to mirror real-world DevOps / platform bootstrapping practices.
+This repository reflects my personal learning journey, capturing the tools and techniques I learned while exploring Linux dev environments and automation.
 
 ---
 
