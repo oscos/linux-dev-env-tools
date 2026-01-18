@@ -84,12 +84,15 @@ echo ""
 echo "=== Docker installation complete! ==="
 echo ""
 
-if groups "$USER" | grep -q docker; then
-    echo "--- Running Docker hello-world test..."
-    docker run --rm hello-world && \
-        echo "=== Docker is working correctly! ==="
-else
-    echo "=== Docker installed successfully ==="
-    echo "Log out and back in, then run:"
-    echo "    docker run hello-world"
-fi
+# if groups "$USER" | grep -q docker; then
+#     echo "--- Running Docker hello-world test..."
+#     docker run --rm hello-world && \
+#         echo "=== Docker is working correctly! ==="
+# else
+#     echo "=== Docker installed successfully ==="
+#     echo "Log out and back in, then run:"
+#     echo "    docker run hello-world"
+# fi
+
+echo "Log out and back in (or run: newgrp docker), then run:"
+echo "    docker run hello-world"
