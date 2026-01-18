@@ -34,7 +34,7 @@ fi
 # Configure Poetry (recommended best practices)
 echo "[5/6] Configuring Poetry settings..."
 # Keep virtualenvs outside project directories
-poetry config virtualenvs.in-project false
+poetry config virtualenvs.in-project true
 
 # Install pre-commit as global CLI tool
 echo "[6/6] Installing pre-commit..."
